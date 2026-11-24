@@ -76,7 +76,7 @@ textarea.text{resize:vertical;min-height:58px;padding:8px 10px}
 .btn:active{transform:translateY(1px)}
 .warn{background:#fff3cd;border:1px solid #e6d28a;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px}
 
-dialog{border:none;border-radius:16px;padding:18px;width:min(92vw,420px);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+dialog{border:none;border-radius:16px;padding:18px;width:min(92vw,420px);max-height:92vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.3)}
 dialog::backdrop{background:rgba(0,0,0,.4)}
 dialog h2{font-size:18px;margin:0 0 4px}
 dialog .row{display:flex;gap:8px;align-items:center;margin:12px 0}
@@ -156,7 +156,11 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
     <span>〜</span>
     <input type="date" id="pTo" class="text" aria-label="終了日">
   </div>
-  <p class="dnote">次の画面で「PDFに保存」を選ぶとPDFになります。プリンターを選べば、そのまま印刷できます。</p>
+  <p class="dnote"><b>PDFにするとき（iPhone）</b><br>
+    ① 次の画面の右上にある共有マーク（□に↑）を押します。<br>
+    ② 「PDFを作成」を選びます。<br>
+    ③ 出てきた画面の右下の共有マークから、保存先（「ファイルに保存」など）を選びます。</p>
+  <p class="dnote"><b>印刷するとき</b><br>プリンターを選んで、右上の青い印刷ボタンを押します。</p>
   <div class="acts">
     <button class="btn ghost" id="pCancel">閉じる</button>
     <button class="btn" id="pGo">この期間で印刷</button>
@@ -412,13 +416,25 @@ function fitPrint(){
   const prev=pa.getAttribute('style');
   // 印刷時と同じ幅（A4 - 余白12mm×2 = 186mm）で、画面の外に表示して測る
   pa.style.cssText='display:block;position:absolute;left:-10000px;top:0;width:186mm;visibility:hidden';
+  const MM=96/25.4, MAX_MM=258; // 1ページの高さの上限（A4の印字範囲に余裕を持たせた値）
   const over=b=>b.scrollHeight>b.clientHeight+1;
-  pa.querySelectorAll('.cellbox.fit').forEach(box=>{
-    let fs=10.5;
-    box.style.fontSize=fs+'pt';
-    while(over(box)&&fs>6){fs-=0.5;box.style.fontSize=fs+'pt';}
-    if(over(box)){box.style.height='auto';box.style.overflow='visible';} // 6ptでも入らない場合は行を広げる
-  });
+  const pageMm=()=>Math.max(...[...pa.querySelectorAll('.ppage')].map(p=>p.getBoundingClientRect().height/MM));
+  const layout=h=>{
+    pa.querySelectorAll('.cellbox').forEach(b=>{b.style.height=h+'mm';b.style.overflow='hidden';});
+    pa.querySelectorAll('.cellbox.fit').forEach(box=>{
+      let fs=10.5;
+      box.style.fontSize=fs+'pt';
+      while(over(box)&&fs>6){fs-=0.5;box.style.fontSize=fs+'pt';}
+      if(over(box)){box.style.height='auto';box.style.overflow='visible';} // 6ptでも入らない場合は行を広げる
+    });
+  };
+  // 端末（iPhoneなど）のフォントで1ページが長くなり下が切れないよう、行の高さを縮めて収める
+  let h=24;
+  layout(h);
+  for(let k=0;k<6&&h>14&&pageMm()>MAX_MM;k++){
+    h=Math.max(14,h-Math.max(1,(pageMm()-MAX_MM)/7));
+    layout(h);
+  }
   if(prev===null)pa.removeAttribute('style');else pa.setAttribute('style',prev);
 }
 window.addEventListener('beforeprint',buildPrint);
