@@ -106,7 +106,7 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
 .cellbox ul{margin:0;padding:0;list-style:none}
 .cellbox li{margin-bottom:1mm}
 .cellbox li::before{content:"・"}
-.cellbox .nl{white-space:pre-wrap;word-break:break-all}
+.cellbox .nl{white-space:pre-wrap;word-break:break-all;line-height:1.4}
 
 @media print{
   @page{size:A4 portrait;margin:12mm}
@@ -397,12 +397,29 @@ function buildPrint(){
           return `<tr>
             <td class="d"><div class="cellbox">${esc(fmt(r.date))}</div></td>
             <td class="yn">${r.done?'✓':''}</td><td class="yn"></td>
-            <td><div class="cellbox"><ul>${acts.map(a=>'<li>'+esc(a)+'</li>').join('')}</ul></div></td>
-            <td><div class="cellbox"><div class="nl">${esc(r.note)}</div></div></td>
+            <td><div class="cellbox fit"><ul>${acts.map(a=>'<li>'+esc(a)+'</li>').join('')}</ul></div></td>
+            <td><div class="cellbox fit"><div class="nl">${esc(r.note)}</div></div></td>
           </tr>`;}).join('')}
         </tbody>
       </table>
     </section>`).join('');
+  fitPrint();
+}
+
+/* 文章が多いときは、枠に収まるまで文字を小さくする（日付は変えない） */
+function fitPrint(){
+  const pa=$('#printArea');
+  const prev=pa.getAttribute('style');
+  // 印刷時と同じ幅（A4 - 余白12mm×2 = 186mm）で、画面の外に表示して測る
+  pa.style.cssText='display:block;position:absolute;left:-10000px;top:0;width:186mm;visibility:hidden';
+  const over=b=>b.scrollHeight>b.clientHeight+1;
+  pa.querySelectorAll('.cellbox.fit').forEach(box=>{
+    let fs=10.5;
+    box.style.fontSize=fs+'pt';
+    while(over(box)&&fs>6){fs-=0.5;box.style.fontSize=fs+'pt';}
+    if(over(box)){box.style.height='auto';box.style.overflow='visible';} // 6ptでも入らない場合は行を広げる
+  });
+  if(prev===null)pa.removeAttribute('style');else pa.setAttribute('style',prev);
 }
 window.addEventListener('beforeprint',buildPrint);
 
