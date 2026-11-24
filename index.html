@@ -46,6 +46,7 @@ h1{font-size:20px;margin:4px 0 12px}
 .del:hover{background:#f3e3df;color:var(--danger)}
 .cal{border:1px solid var(--accent);background:#fff;color:var(--accent);font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;cursor:pointer}
 .cal:hover{background:var(--accent-soft)}
+.calrow{text-align:right;margin-top:6px}
 .fl{font-size:12px;color:var(--sub);margin:6px 0 3px;display:flex;justify-content:space-between;align-items:center}
 .acts3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 
@@ -219,10 +220,11 @@ function render(){
         <label class="datebtn"><span class="dtext">${esc(fmt(r.date)||'日付を選ぶ')}</span><input type="date" class="date" value="${esc(r.date)}"></label>
         <label class="check"><input type="checkbox" class="done"${r.done?' checked':''}><span>特別な時間をした</span></label>
       </div>
-      <div class="fl"><span>活動内容（3つまで）</span><button type="button" class="cal">📅 カレンダーに追加</button></div>
+      <div class="fl"><span>活動内容（3つまで）</span></div>
       <div class="acts3">${acts}</div>
       <div class="fl"><span>特別な時間での問題や疑問</span><button type="button" class="del">この日を削除</button></div>
       <textarea class="text note" placeholder="困ったこと・聞きたいことなど">${esc(r.note)}</textarea>
+      <div class="calrow"><button type="button" class="cal">📅 カレンダーに追加</button></div>
     </div>`;
   }).join('');
 }
