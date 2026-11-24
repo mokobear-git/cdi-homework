@@ -16,7 +16,15 @@ body{margin:0;background:var(--bg);color:var(--ink);line-height:1.5;font-size:16
   font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif}
 button,input,textarea{font:inherit;color:inherit}
 .app{max-width:640px;margin:0 auto;padding:16px 14px 110px}
-h1{font-size:20px;margin:4px 0 12px}
+h1{font-size:20px;margin:0}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 12px}
+.helpbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);font-weight:700;font-size:15px;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.helpbtn:hover{background:var(--accent-soft)}
+#helpDlg h2{margin-bottom:10px}
+#helpDlg h3{font-size:17px;margin:18px 0 4px;padding-left:10px;border-left:5px solid var(--accent)}
+#helpDlg p,#helpDlg li{font-size:16px;line-height:1.7;margin:4px 0}
+#helpDlg ol,#helpDlg ul{margin:4px 0;padding-left:1.4em}
+#helpDlg .tip{background:var(--accent-soft);border-radius:10px;padding:8px 12px;margin:8px 0}
 .sub{color:var(--sub);font-size:13px;margin:0 0 14px}
 
 .profile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:flex-end;margin-bottom:12px}
@@ -122,7 +130,10 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
 <body>
 
 <div class="app">
-  <h1>CDI宿題シート</h1>
+  <div class="head">
+    <h1>CDI宿題シート</h1>
+    <button type="button" class="helpbtn" id="helpBtn">？ 使い方</button>
+  </div>
   <p class="sub">記録はこの端末のブラウザの中に保存されます（「カレンダーに追加」を押した時以外は、外部に送信されません）。活動欄は ▼ かダブルタップで、よく使う遊びを選べます。</p>
   <div id="warn"></div>
 
@@ -150,7 +161,7 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
 
 <dialog id="printDlg">
   <h2>印刷・PDFにする</h2>
-  <p class="dnote">印刷したい期間を選びます。1枚に7日分が入ります。</p>
+  <p class="dnote">印刷したい期間を選びます。1枚に7日分が入ります。記録がない日も、日付だけ印刷されます。</p>
   <div class="row">
     <input type="date" id="pFrom" class="text" aria-label="開始日">
     <span>〜</span>
@@ -165,6 +176,52 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
     <button class="btn ghost" id="pCancel">閉じる</button>
     <button class="btn" id="pGo">この期間で印刷</button>
   </div>
+</dialog>
+
+<dialog id="helpDlg">
+  <h2>使い方</h2>
+
+  <h3>1. 最初に入れるもの</h3>
+  <p>画面の上にある「母／父」のどちらかを選び、「こどもの名前」を入力します。一度入れれば、次からは入れ直さなくて大丈夫です。</p>
+
+  <h3>2. 日の欄を作る</h3>
+  <ol>
+    <li>画面の下の「＋ 日を追加」を押すと、1日分の欄ができます。</li>
+    <li>日付は、前の日の次の日が自動で入ります。変えたいときは、日付のボタンを押して、カレンダーから選びます。</li>
+  </ol>
+
+  <h3>3. 記録を書く</h3>
+  <ul>
+    <li><b>特別な時間をした日</b>は、「特別な時間をした」のボタンを押して、緑にします。しなかった日は、押さずにそのままにします。</li>
+    <li><b>活動内容</b>は、3つまで書けます。文字を入力するか、右の「▼」を押して、前に使った遊びから選びます。欄をダブルタップしても、選べます。</li>
+    <li>新しく書いた遊びは、次から候補の一番上に出ます。候補の「×」で消せます。</li>
+    <li><b>特別な時間での問題や疑問</b>は、困ったことや聞きたいことを書きます。</li>
+  </ul>
+  <div class="tip">入力した内容は、書くたびに自動で保存されます。「保存」ボタンはありません。</div>
+
+  <h3>4. 印刷・PDFにする</h3>
+  <ol>
+    <li>画面の下の「印刷・PDF」を押します。</li>
+    <li>印刷したい期間を選んで、「この期間で印刷」を押します。1枚に7日分が入ります。記録がない日も、日付だけ印刷されます（チェックは付きません）。</li>
+    <li><b>iPhone</b>：右上の共有マーク（□に↑）を押して、「PDFを作成」を選びます。出てきた画面の右下の共有マークから、「ファイルに保存」などを選びます。</li>
+    <li><b>プリンターで印刷する</b>：プリンターを選んで、右上の青い印刷ボタンを押します。</li>
+  </ol>
+
+  <h3>5. Googleカレンダーに入れる</h3>
+  <p>日の欄の右下にある「カレンダーに追加」を押すと、その日の予定を作る画面が開きます。内容を確かめて「保存」を押すと、カレンダーに入ります。Googleにログインしている必要があります。</p>
+
+  <h3>6. 日の欄を消す</h3>
+  <p>「問題や疑問」の見出しの右にある「この日を削除」を押します。</p>
+
+  <h3>7. 記録の保存について</h3>
+  <ul>
+    <li>記録は、お使いのスマホのブラウザの中にだけ保存されます。ほかの人には見えません。</li>
+    <li>ブラウザの履歴やサイトのデータを消すと、記録も消えます。</li>
+    <li>iPhoneでは、Safariの共有マークから「ホーム画面に追加」をしておくと、記録が消えにくくなります。</li>
+    <li>別のスマホやパソコンには、記録は引き継がれません。</li>
+  </ul>
+
+  <div class="acts"><button class="btn" id="helpClose">閉じる</button></div>
 </dialog>
 
 <div id="printArea"></div>
@@ -361,17 +418,36 @@ function defaultRange(){
   sortRows();
   const dated=S.rows.filter(r=>r.date);
   if(!dated.length)return null;
-  return {from:dated[Math.max(0,dated.length-7)].date,to:dated[dated.length-1].date};
+  // 最後の記録の日から7日分（1枚分）。それより前の記録がなければ、最初の記録の日から。
+  const last=parse(dated[dated.length-1].date);
+  const start=ymd(new Date(last.getFullYear(),last.getMonth(),last.getDate()-6));
+  return {from:start>dated[0].date?start:dated[0].date,to:dated[dated.length-1].date};
 }
 function currentRange(){
   const f=$('#pFrom').value,t=$('#pTo').value;
-  if(f||t)return {from:f||'0000-00-00',to:t||'9999-99-99'};
+  if(f||t){
+    const dated=S.rows.filter(r=>r.date);
+    if(!dated.length)return null;
+    return {from:f||dated[0].date,to:t||dated[dated.length-1].date};
+  }
   return defaultRange();
 }
 function buildPrint(){
   const range=currentRange();
-  const rows=range?S.rows.filter(r=>r.date&&r.date>=range.from&&r.date<=range.to):[];
   sortRows();
+  // 期間内の毎日を1行ずつ並べる。記録がない日も、日付だけ入れて（チェックなし・空欄で）印刷する
+  const rows=[];
+  if(range){
+    const end=parse(range.to);
+    let d=parse(range.from);
+    for(let n=0;d&&end&&d<=end&&n<100;n++){
+      const key=ymd(d);
+      const hit=S.rows.filter(r=>r.date===key);
+      if(hit.length)rows.push(...hit);
+      else rows.push({date:key,done:false,acts:['','',''],note:''});
+      d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+    }
+  }
   const pages=[];
   const total=Math.max(1,Math.ceil(rows.length/7))*7;
   const padded=rows.slice();
@@ -456,6 +532,13 @@ $('#pGo').addEventListener('click',()=>{
   buildPrint();
   setTimeout(()=>window.print(),150);
 });
+
+const helpDlg=$('#helpDlg');
+$('#helpBtn').addEventListener('click',()=>{
+  if(helpDlg.showModal)helpDlg.showModal();else helpDlg.setAttribute('open','');
+  helpDlg.scrollTop=0;
+});
+$('#helpClose').addEventListener('click',()=>helpDlg.close());
 
 render();
 })();
