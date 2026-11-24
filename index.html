@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CDI宿題シート</title>
+<style>
+:root{
+  --bg:#f4f1ea; --card:#fff; --ink:#2b2b2b; --sub:#6b6b6b; --line:#d9d4c7;
+  --accent:#2f7d6b; --accent-soft:#e3f1ed; --danger:#b3402f;
+  --input-fs:16px; --input-lh:1.5;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.5;font-size:16px;
+  font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif}
+button,input,textarea{font:inherit;color:inherit}
+.app{max-width:640px;margin:0 auto;padding:16px 14px 110px}
+h1{font-size:20px;margin:4px 0 12px}
+.sub{color:var(--sub);font-size:13px;margin:0 0 14px}
+
+.profile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:flex-end;margin-bottom:12px}
+.profile .grow{flex:1;min-width:0}
+.profile label.lbl,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+.text{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:var(--input-fs);line-height:var(--input-lh);font-family:inherit}
+.text:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+.seg{display:inline-flex;gap:8px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:inline-block;min-width:50px;text-align:center;padding:7px 14px;border:2px solid var(--line);border-radius:999px;font-weight:700;color:var(--sub);background:#fff;cursor:pointer}
+.seg input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff}
+.seg input:focus-visible+span{outline:3px solid #9fd3c6}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.datebtn{position:relative;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--accent);border-radius:10px;background:var(--accent-soft);font-weight:700;font-size:18px;color:#1f5a4d;cursor:pointer;min-width:132px;justify-content:center}
+.datebtn::after{content:"▾";font-size:12px}
+.datebtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.check{position:relative;margin-left:auto}
+.check input{position:absolute;opacity:0;pointer-events:none}
+.check span{display:inline-block;padding:9px 14px;border:2px solid var(--line);border-radius:999px;font-weight:700;color:var(--sub);background:#fff;cursor:pointer;font-size:15px}
+.check input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff}
+.check input:checked+span::before{content:"✓ "}
+.check input:focus-visible+span{outline:3px solid #9fd3c6}
+.del{border:none;background:none;font-size:12px;padding:2px 4px;cursor:pointer;color:var(--sub);border-radius:8px;text-decoration:underline}
+.del:hover{background:#f3e3df;color:var(--danger)}
+.cal{border:1px solid var(--accent);background:#fff;color:var(--accent);font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;cursor:pointer}
+.cal:hover{background:var(--accent-soft)}
+.fl{font-size:12px;color:var(--sub);margin:6px 0 3px;display:flex;justify-content:space-between;align-items:center}
+.acts3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+
+.combo{position:relative;display:flex;min-width:0}
+.combo input{flex:1;min-width:0;width:100%;padding:8px 6px 8px 8px;border:1px solid var(--line);border-right:none;border-radius:10px 0 0 10px;background:#fff;font-size:var(--input-fs);line-height:var(--input-lh);font-family:inherit;touch-action:manipulation}
+.combo input:focus{outline:2px solid var(--accent);border-color:var(--accent);z-index:1}
+.combo .arrow{flex:none;width:28px;border:1px solid var(--line);border-radius:0 10px 10px 0;background:#f8f6f1;cursor:pointer;font-size:11px;color:var(--sub);padding:0}
+.combo .arrow:hover{background:var(--accent-soft)}
+.panel{position:absolute;left:0;width:210px;top:calc(100% + 4px);z-index:20;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.14);max-height:240px;overflow:auto}
+.opt{display:flex;align-items:center;border-bottom:1px solid #f0ece2}
+.opt:last-child{border-bottom:none}
+.opt .otxt{flex:1;padding:11px 12px;cursor:pointer}
+.opt .otxt:hover{background:var(--accent-soft)}
+.opt .rm{border:none;background:none;width:44px;align-self:stretch;font-size:18px;color:var(--sub);cursor:pointer}
+.opt .rm:hover{color:var(--danger)}
+.panel .empty{padding:12px;color:var(--sub);font-size:14px}
+.panel .hint{padding:8px 12px;color:var(--sub);font-size:12px;background:#faf8f3;border-top:1px solid #f0ece2}
+.combo[data-i="2"] .panel{left:auto;right:0}
+textarea.text{resize:vertical;min-height:58px;padding:8px 10px}
+
+.emptystate{text-align:center;color:var(--sub);padding:34px 10px;background:var(--card);border:1px dashed var(--line);border-radius:14px}
+
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(244,241,234,.96);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));z-index:30}
+.bar .in{max-width:640px;margin:0 auto;display:flex;gap:10px}
+.btn{flex:1;padding:13px 10px;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-weight:700;font-size:16px;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+.warn{background:#fff3cd;border:1px solid #e6d28a;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+
+dialog{border:none;border-radius:16px;padding:18px;width:min(92vw,420px);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog h2{font-size:18px;margin:0 0 4px}
+dialog .row{display:flex;gap:8px;align-items:center;margin:12px 0}
+dialog .row .text{flex:1}
+dialog .acts{display:flex;gap:10px;margin-top:16px}
+.dnote{font-size:13px;color:var(--sub);margin:6px 0 0}
+
+/* ===== 印刷用シート ===== */
+#printArea{display:none}
+.ppage{font-family:"Meiryo","メイリオ","Hiragino Sans","Yu Gothic",sans-serif;color:#000}
+.ptitle{text-align:center;font-weight:700;font-size:15pt;margin:2mm 0 8mm}
+.pmeta{display:flex;gap:14mm;align-items:baseline;font-size:11pt;margin-bottom:6mm}
+.circ{display:inline-block;border:1.5px solid #000;border-radius:50%;width:1.7em;height:1.7em;line-height:1.6em;text-align:center}
+.plain{display:inline-block;width:1.7em;text-align:center}
+.pname{display:inline-block;min-width:60mm;border-bottom:1px solid #000;padding:0 2mm;text-align:center}
+.ptable{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10.5pt}
+.ptable th,.ptable td{border:1px solid #000;vertical-align:top;padding:1.5mm 2mm}
+.ptable thead th{text-align:center;vertical-align:middle;font-weight:700;padding:3mm 2mm}
+.ptable th.yn{padding:1mm 0;font-size:9pt;white-space:nowrap}
+.ptable td.yn{text-align:center;font-size:16pt;vertical-align:middle}
+.ptable .c-date{width:14%}
+.ptable .c-yn{width:6.48%}
+.ptable .c-act{width:30%}
+.ptable .c-note{width:43.04%}
+.ptable td.d{font-weight:700;font-size:11pt;padding-left:1.5mm;padding-right:1mm}
+.cellbox{height:24mm;overflow:hidden}
+.cellbox ul{margin:0;padding:0;list-style:none}
+.cellbox li{margin-bottom:1mm}
+.cellbox li::before{content:"・"}
+.cellbox .nl{white-space:pre-wrap;word-break:break-all}
+
+@media print{
+  @page{size:A4 portrait;margin:12mm}
+  html,body{background:#fff}
+  .app,.bar,dialog{display:none!important}
+  #printArea{display:block}
+  .ppage{page-break-after:always;break-after:page}
+  .ppage:last-child{page-break-after:auto;break-after:auto}
+  .ptable tr{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <h1>CDI宿題シート</h1>
+  <p class="sub">記録はこの端末のブラウザの中に保存されます（「カレンダーに追加」を押した時以外は、外部に送信されません）。活動欄は ▼ かダブルタップで、よく使う遊びを選べます。</p>
+  <div id="warn"></div>
+
+  <section class="profile">
+    <div>
+      <span class="lbl">記入した人</span>
+      <div class="seg" id="parentSeg">
+        <label><input type="radio" name="parent" value="母"><span>母</span></label>
+        <label><input type="radio" name="parent" value="父"><span>父</span></label>
+      </div>
+    </div>
+    <div class="grow">
+      <label class="lbl" for="child">こどもの名前</label>
+      <input id="child" class="text" type="text" autocomplete="off" placeholder="例：たろう">
+    </div>
+  </section>
+
+  <div id="list"></div>
+</div>
+
+<div class="bar"><div class="in">
+  <button class="btn ghost" id="addBtn">＋ 日を追加</button>
+  <button class="btn" id="printBtn">🖨 印刷・PDF</button>
+</div></div>
+
+<dialog id="printDlg">
+  <h2>印刷・PDFにする</h2>
+  <p class="dnote">印刷したい期間を選びます。1枚に7日分が入ります。</p>
+  <div class="row">
+    <input type="date" id="pFrom" class="text" aria-label="開始日">
+    <span>〜</span>
+    <input type="date" id="pTo" class="text" aria-label="終了日">
+  </div>
+  <p class="dnote">次の画面で「PDFに保存」を選ぶとPDFになります。プリンターを選べば、そのまま印刷できます。</p>
+  <div class="acts">
+    <button class="btn ghost" id="pCancel">閉じる</button>
+    <button class="btn" id="pGo">この期間で印刷</button>
+  </div>
+</dialog>
+
+<div id="printArea"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='pcitCdiHomework.v1';
+const WD=['日','月','火','水','木','金','土'];
+const DEFAULT_PLAYS=['レゴデュプロ','お絵かき','ぬりえ','トミカ','プラレール','レゴブロック'];
+const $=s=>document.querySelector(s);
+
+/* ---------- データ ---------- */
+function blank(){return {parent:'母',child:'',plays:DEFAULT_PLAYS.slice(),rows:[]};}
+function load(){
+  try{
+    const s=JSON.parse(localStorage.getItem(KEY));
+    if(s&&Array.isArray(s.rows)){
+      const d=Object.assign(blank(),s);
+      if(!Array.isArray(d.plays))d.plays=DEFAULT_PLAYS.slice();
+      return d;
+    }
+  }catch(e){}
+  return blank();
+}
+let S=load();
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));}
+  catch(e){$('#warn').innerHTML='<div class="warn">⚠ この端末では保存ができません（プライベートブラウズ中など）。閉じると記録が消えます。</div>';}
+}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function parse(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?new Date(+m[1],+m[2]-1,+m[3]):null;}
+function fmt(s){const d=parse(s);return d?(d.getMonth()+1)+'/'+d.getDate()+'('+WD[d.getDay()]+')':'';}
+function sortRows(){S.rows.sort((a,b)=>(a.date||'').localeCompare(b.date||''));}
+function rowById(id){return S.rows.find(r=>r.id===id);}
+
+/* ---------- 画面の描画 ---------- */
+function render(){
+  sortRows();
+  const list=$('#list');
+  if(!S.rows.length){
+    list.innerHTML='<div class="emptystate">まだ記録がありません。<br>下の「＋ 日を追加」を押して、特別な時間を記録しましょう。</div>';
+    return;
+  }
+  list.innerHTML=S.rows.map(r=>{
+    const acts=[0,1,2].map(i=>`
+      <div class="combo" data-i="${i}">
+        <input type="text" class="act" autocomplete="off" placeholder="活動${i+1}" value="${esc(r.acts[i])}">
+        <button type="button" class="arrow" aria-label="代表的な遊びから選ぶ">▼</button>
+      </div>`).join('');
+    return `
+    <div class="card" data-id="${r.id}">
+      <div class="top">
+        <label class="datebtn"><span class="dtext">${esc(fmt(r.date)||'日付を選ぶ')}</span><input type="date" class="date" value="${esc(r.date)}"></label>
+        <label class="check"><input type="checkbox" class="done"${r.done?' checked':''}><span>特別な時間をした</span></label>
+      </div>
+      <div class="fl"><span>活動内容（3つまで）</span><button type="button" class="cal">📅 カレンダーに追加</button></div>
+      <div class="acts3">${acts}</div>
+      <div class="fl"><span>特別な時間での問題や疑問</span><button type="button" class="del">この日を削除</button></div>
+      <textarea class="text note" placeholder="困ったこと・聞きたいことなど">${esc(r.note)}</textarea>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- 代表的な遊びのプルダウン ---------- */
+function closePanels(){document.querySelectorAll('.panel').forEach(p=>p.remove());}
+function panelHtml(){
+  if(!S.plays.length)return '<div class="empty">まだ登録がありません。活動を入力すると自動で登録されます。</div>';
+  return S.plays.map((t,i)=>`<div class="opt" data-pi="${i}"><span class="otxt">${esc(t)}</span><button type="button" class="rm" aria-label="候補から削除">×</button></div>`).join('')
+    +'<div class="hint">× で候補から消せます（記録は消えません）</div>';
+}
+function openPanel(combo){
+  const had=combo.querySelector('.panel');
+  closePanels();
+  if(had)return;
+  const p=document.createElement('div');
+  p.className='panel';
+  p.innerHTML=panelHtml();
+  combo.appendChild(p);
+}
+function learnPlay(v){
+  v=(v||'').trim();
+  if(v&&!S.plays.includes(v)){S.plays.unshift(v);save();}
+}
+
+/* ---------- イベント ---------- */
+const list=$('#list');
+let lastActTap=0,lastActEl=null;
+
+list.addEventListener('click',e=>{
+  const card=e.target.closest('.card'); if(!card)return;
+  const r=rowById(card.dataset.id); if(!r)return;
+
+  if(e.target.closest('.datebtn')){
+    const inp=card.querySelector('.date');
+    if(e.target!==inp){try{inp.showPicker&&inp.showPicker();}catch(_){}}
+    return;
+  }
+  if(e.target.closest('.cal')){
+    const start=parse(r.date);
+    if(!start){alert('先に日付を選んでください。');return;}
+    const end=new Date(start.getFullYear(),start.getMonth(),start.getDate()+1);
+    const compact=d=>d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
+    const acts=r.acts.map(a=>a.trim()).filter(Boolean);
+    const title='特別な時間'+(acts.length?'（'+acts.join('・')+'）':'');
+    const note=(r.note||'').trim();
+    const url='https://calendar.google.com/calendar/render?action=TEMPLATE'
+      +'&text='+encodeURIComponent(title)
+      +'&dates='+compact(start)+'/'+compact(end)
+      +(note?'&details='+encodeURIComponent('問題や疑問：'+note):'');
+    window.open(url,'_blank','noopener');
+    return;
+  }
+  if(e.target.closest('.del')){
+    if(confirm((fmt(r.date)||'この日')+' の記録を削除しますか？')){
+      S.rows=S.rows.filter(x=>x.id!==r.id);save();render();
+    }
+    return;
+  }
+  const combo=e.target.closest('.combo');
+  if(combo){
+    if(e.target.classList.contains('act')){
+      // 入力欄のダブルタップでも候補を開く
+      const now=Date.now();
+      if(now-lastActTap<400&&lastActEl===e.target){openPanel(combo);lastActTap=0;}
+      else{lastActTap=now;lastActEl=e.target;}
+      return;
+    }
+    if(e.target.closest('.arrow')){openPanel(combo);return;}
+    const opt=e.target.closest('.opt');
+    if(opt){
+      const idx=+opt.dataset.pi;
+      if(e.target.closest('.rm')){
+        S.plays.splice(idx,1);save();
+        combo.querySelector('.panel').innerHTML=panelHtml();
+      }else{
+        const v=S.plays[idx];
+        const i=+combo.dataset.i;
+        combo.querySelector('.act').value=v;
+        r.acts[i]=v;save();closePanels();
+      }
+    }
+  }
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.combo'))closePanels();});
+
+list.addEventListener('input',e=>{
+  const card=e.target.closest('.card'); if(!card)return;
+  const r=rowById(card.dataset.id); if(!r)return;
+  if(e.target.classList.contains('note')){r.note=e.target.value;save();}
+  else if(e.target.classList.contains('act')){
+    r.acts[+e.target.closest('.combo').dataset.i]=e.target.value;save();
+  }
+});
+list.addEventListener('change',e=>{
+  const card=e.target.closest('.card'); if(!card)return;
+  const r=rowById(card.dataset.id); if(!r)return;
+  if(e.target.classList.contains('done')){r.done=e.target.checked;save();}
+  else if(e.target.classList.contains('act')){learnPlay(e.target.value);}
+  else if(e.target.classList.contains('date')){
+    r.date=e.target.value;save();render();
+    const el=document.querySelector('.card[data-id="'+r.id+'"]');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+});
+
+document.querySelectorAll('input[name=parent]').forEach(i=>{
+  i.checked=(i.value===S.parent);
+  i.addEventListener('change',()=>{S.parent=i.value;save();});
+});
+$('#child').value=S.child||'';
+$('#child').addEventListener('input',e=>{S.child=e.target.value;save();});
+
+$('#addBtn').addEventListener('click',()=>{
+  // 記録がある場合は「最後の日の翌日」、ない場合は今日を初期値にする
+  let d=new Date();
+  const dated=S.rows.filter(r=>parse(r.date));
+  if(dated.length){
+    const last=parse(dated[dated.length-1].date);
+    d=new Date(last.getFullYear(),last.getMonth(),last.getDate()+1);
+  }
+  const r={id:uid(),date:ymd(d),done:false,acts:['','',''],note:''};
+  S.rows.push(r);save();render();
+  const el=document.querySelector('.card[data-id="'+r.id+'"]');
+  if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+});
+
+/* ---------- 印刷・PDF ---------- */
+function defaultRange(){
+  sortRows();
+  const dated=S.rows.filter(r=>r.date);
+  if(!dated.length)return null;
+  return {from:dated[Math.max(0,dated.length-7)].date,to:dated[dated.length-1].date};
+}
+function currentRange(){
+  const f=$('#pFrom').value,t=$('#pTo').value;
+  if(f||t)return {from:f||'0000-00-00',to:t||'9999-99-99'};
+  return defaultRange();
+}
+function buildPrint(){
+  const range=currentRange();
+  const rows=range?S.rows.filter(r=>r.date&&r.date>=range.from&&r.date<=range.to):[];
+  sortRows();
+  const pages=[];
+  const total=Math.max(1,Math.ceil(rows.length/7))*7;
+  const padded=rows.slice();
+  while(padded.length<total)padded.push(null);
+  for(let p=0;p<padded.length;p+=7)pages.push(padded.slice(p,p+7));
+
+  const meta=`
+    <div class="pmeta">
+      <span>${S.parent==='母'?'<span class="circ">母</span>':'<span class="plain">母</span>'}
+      　${S.parent==='父'?'<span class="circ">父</span>':'<span class="plain">父</span>'}</span>
+      <span>こどもの名前 <span class="pname">${esc(S.child)}</span></span>
+    </div>`;
+  $('#printArea').innerHTML=pages.map(pg=>`
+    <section class="ppage">
+      <div class="ptitle">CDI宿題シート</div>
+      ${meta}
+      <table class="ptable">
+        <colgroup><col class="c-date"><col class="c-yn"><col class="c-yn"><col class="c-act"><col class="c-note"></colgroup>
+        <thead>
+          <tr><th rowspan="2">日付を記入</th><th colspan="2">特別な時間を実施したか</th><th rowspan="2">活動内容</th><th rowspan="2">特別な時間での問題や疑問</th></tr>
+          <tr><th class="yn">はい</th><th class="yn">いいえ</th></tr>
+        </thead>
+        <tbody>
+        ${pg.map(r=>{
+          if(!r)return '<tr><td class="d"><div class="cellbox"></div></td><td class="yn"></td><td class="yn"></td><td><div class="cellbox"></div></td><td><div class="cellbox"></div></td></tr>';
+          const acts=r.acts.map(a=>a.trim()).filter(Boolean);
+          return `<tr>
+            <td class="d"><div class="cellbox">${esc(fmt(r.date))}</div></td>
+            <td class="yn">${r.done?'✓':''}</td><td class="yn"></td>
+            <td><div class="cellbox"><ul>${acts.map(a=>'<li>'+esc(a)+'</li>').join('')}</ul></div></td>
+            <td><div class="cellbox"><div class="nl">${esc(r.note)}</div></div></td>
+          </tr>`;}).join('')}
+        </tbody>
+      </table>
+    </section>`).join('');
+}
+window.addEventListener('beforeprint',buildPrint);
+
+const dlg=$('#printDlg');
+$('#printBtn').addEventListener('click',()=>{
+  const r=defaultRange();
+  if(!r){alert('まだ記録がありません。');return;}
+  $('#pFrom').value=r.from;$('#pTo').value=r.to;
+  if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');
+});
+$('#pCancel').addEventListener('click',()=>dlg.close());
+$('#pGo').addEventListener('click',()=>{
+  dlg.close();
+  buildPrint();
+  setTimeout(()=>window.print(),150);
+});
+
+render();
+})();
+</script>
+</body>
+</html>
