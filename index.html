@@ -415,8 +415,12 @@ function fitPrint(){
   const pa=$('#printArea');
   const prev=pa.getAttribute('style');
   // 印刷時と同じ幅（A4 - 余白12mm×2 = 186mm）で、画面の外に表示して測る
-  pa.style.cssText='display:block;position:absolute;left:-10000px;top:0;width:186mm;visibility:hidden';
-  const MM=96/25.4, MAX_MM=258; // 1ページの高さの上限（A4の印字範囲に余裕を持たせた値）
+  // iPhone/iPadの印刷は、画面上の寸法より約1.16倍に拡大されて出力される（実機で確認）。
+  // そのため、拡大後にA4へ収まるよう、幅を狭く・高さの上限を低くして測る。
+  const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const W_MM=IOS?167:186;
+  pa.style.cssText='display:block;position:absolute;left:-10000px;top:0;width:'+W_MM+'mm;visibility:hidden';
+  const MM=96/25.4, MAX_MM=IOS?232:258; // 1ページの高さの上限（A4の印字範囲に余裕を持たせた値）
   const over=b=>b.scrollHeight>b.clientHeight+1;
   const pageMm=()=>Math.max(...[...pa.querySelectorAll('.ppage')].map(p=>p.getBoundingClientRect().height/MM));
   const layout=h=>{
