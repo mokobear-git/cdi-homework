@@ -28,14 +28,17 @@ h1{font-size:20px;margin:0}
 .sub{color:var(--sub);font-size:13px;margin:0 0 14px}
 
 .profile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:flex-end;margin-bottom:12px}
+.profile{flex-wrap:wrap}
 .profile .grow{flex:1;min-width:0}
+.profile .otherrow{flex-basis:100%}
+[hidden]{display:none!important}
 .profile label.lbl,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
 .text{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:var(--input-fs);line-height:var(--input-lh);font-family:inherit}
 .text:focus{outline:2px solid var(--accent);border-color:var(--accent)}
-.seg{display:inline-flex;gap:8px}
+.seg{display:inline-flex;gap:6px}
 .seg label{position:relative}
 .seg input{position:absolute;opacity:0;pointer-events:none}
-.seg span{display:inline-block;min-width:50px;text-align:center;padding:7px 14px;border:2px solid var(--line);border-radius:999px;font-weight:700;color:var(--sub);background:#fff;cursor:pointer}
+.seg span{display:inline-block;min-width:44px;text-align:center;padding:7px 11px;border:2px solid var(--line);border-radius:999px;font-weight:700;color:var(--sub);background:#fff;cursor:pointer}
 .seg input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff}
 .seg input:focus-visible+span{outline:3px solid #9fd3c6}
 
@@ -96,9 +99,12 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
 #printArea{display:none}
 .ppage{font-family:"Meiryo","メイリオ","Hiragino Sans","Yu Gothic",sans-serif;color:#000}
 .ptitle{text-align:center;font-weight:700;font-size:15pt;margin:2mm 0 8mm}
-.pmeta{display:flex;gap:14mm;align-items:baseline;font-size:11pt;margin-bottom:6mm}
+.pmeta{display:flex;flex-wrap:wrap;gap:3mm 12mm;align-items:baseline;font-size:11pt;margin-bottom:6mm}
 .circ{display:inline-block;border:1.5px solid #000;border-radius:50%;width:1.7em;height:1.7em;line-height:1.6em;text-align:center}
 .plain{display:inline-block;width:1.7em;text-align:center}
+.circ.wide,.plain.wide{width:auto;height:auto;padding:0 2.2mm}
+.circ.wide{border-radius:1em}
+.oname{word-break:break-all;overflow-wrap:anywhere}
 .pname{display:inline-block;min-width:60mm;border-bottom:1px solid #000;padding:0 2mm;text-align:center}
 .ptable{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10.5pt}
 .ptable th,.ptable td{border:1px solid #000;vertical-align:top;padding:1.5mm 2mm}
@@ -140,15 +146,20 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
 
   <section class="profile">
     <div>
-      <span class="lbl">記入した人</span>
+      <span class="lbl">実施者</span>
       <div class="seg" id="parentSeg">
         <label><input type="radio" name="parent" value="母"><span>母</span></label>
         <label><input type="radio" name="parent" value="父"><span>父</span></label>
+        <label><input type="radio" name="parent" value="他"><span>その他</span></label>
       </div>
     </div>
     <div class="grow">
       <label class="lbl" for="child">こどもの名前</label>
       <input id="child" class="text" type="text" autocomplete="off" placeholder="例：たろう">
+    </div>
+    <div class="otherrow" id="otherRow" hidden>
+      <label class="lbl" for="other">実施した人（その他）</label>
+      <input id="other" class="text" type="text" autocomplete="off" placeholder="例：祖母、祖父、おじ など">
     </div>
   </section>
 
@@ -183,7 +194,7 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
   <h2>使い方</h2>
 
   <h3>1. 最初に入れるもの</h3>
-  <p>画面の上にある「母／父」のどちらかを選び、「こどもの名前」を入力します。一度入れれば、次からは入れ直さなくて大丈夫です。</p>
+  <p>画面の上にある「実施者」を、母・父・その他から選びます。「その他」を選ぶと、実施した人を書く欄が出ます（例：祖母）。続けて「こどもの名前」を入力します。一度入れれば、次からは入れ直さなくて大丈夫です。</p>
 
   <h3>2. 日の欄を作る</h3>
   <ol>
@@ -236,7 +247,7 @@ const DEFAULT_PLAYS=['レゴデュプロ','お絵かき','ぬりえ','トミカ'
 const $=s=>document.querySelector(s);
 
 /* ---------- データ ---------- */
-function blank(){return {parent:'母',child:'',plays:DEFAULT_PLAYS.slice(),rows:[]};}
+function blank(){return {parent:'母',other:'',child:'',plays:DEFAULT_PLAYS.slice(),rows:[]};}
 function load(){
   try{
     const s=JSON.parse(localStorage.getItem(KEY));
@@ -393,10 +404,17 @@ list.addEventListener('change',e=>{
   }
 });
 
+function showOther(){$('#otherRow').hidden=(S.parent!=='他');}
 document.querySelectorAll('input[name=parent]').forEach(i=>{
   i.checked=(i.value===S.parent);
-  i.addEventListener('change',()=>{S.parent=i.value;save();});
+  i.addEventListener('change',()=>{
+    S.parent=i.value;save();showOther();
+    if(S.parent==='他')$('#other').focus();
+  });
 });
+$('#other').value=S.other||'';
+$('#other').addEventListener('input',e=>{S.other=e.target.value;save();});
+showOther();
 $('#child').value=S.child||'';
 $('#child').addEventListener('input',e=>{S.child=e.target.value;save();});
 
@@ -455,10 +473,10 @@ function buildPrint(){
   while(padded.length<total)padded.push(null);
   for(let p=0;p<padded.length;p+=7)pages.push(padded.slice(p,p+7));
 
+  const mark=(v,label,wide)=>`<span class="${S.parent===v?'circ':'plain'}${wide?' wide':''}">${label}</span>`;
   const meta=`
     <div class="pmeta">
-      <span>${S.parent==='母'?'<span class="circ">母</span>':'<span class="plain">母</span>'}
-      　${S.parent==='父'?'<span class="circ">父</span>':'<span class="plain">父</span>'}</span>
+      <span>実施者　${mark('母','母')}　${mark('父','父')}　${mark('他','その他',true)}${S.parent==='他'?'<span class="oname">（'+esc(S.other)+'）</span>':''}</span>
       <span>こどもの名前 <span class="pname">${esc(S.child)}</span></span>
     </div>`;
   $('#printArea').innerHTML=pages.map(pg=>`
