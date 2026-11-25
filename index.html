@@ -174,7 +174,7 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
 
 <dialog id="printDlg">
   <h2>印刷・PDFにする</h2>
-  <p class="dnote">印刷したい期間を選びます。1枚に7日分が入ります。記録がない日は、日付と「いいえ」の丸が印刷されます。</p>
+  <p class="dnote">印刷したい期間を選びます。1枚に7日分が入ります。活動を書いていない日は、「いいえ」の丸が印刷されます。</p>
   <div class="row">
     <input type="date" id="pFrom" class="text" aria-label="開始日">
     <span>〜</span>
@@ -184,7 +184,11 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
     ① 次の画面の右上にある共有マーク（□に↑）を押します。<br>
     ② 「PDFを作成」を選びます。<br>
     ③ 出てきた画面の右下の共有マークから、保存先（「ファイルに保存」など）を選びます。</p>
-  <p class="dnote"><b>印刷するとき</b><br>プリンターを選んで、右上の青い印刷ボタンを押します。</p>
+  <p class="dnote"><b>PDFにするとき（Android）</b><br>
+    ① 次の画面の上にあるプリンター名の右の「▼」を押します。<br>
+    ② 「PDF形式で保存」を選びます。<br>
+    ③ 右の青いボタンを押して、保存先を選びます。</p>
+  <p class="dnote"><b>印刷するとき</b><br>プリンターを選んで、青い印刷ボタンを押します。</p>
   <div class="acts">
     <button class="btn ghost" id="pCancel">閉じる</button>
     <button class="btn" id="pGo">この期間で印刷</button>
@@ -215,9 +219,10 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
   <h3>4. 印刷・PDFにする</h3>
   <ol>
     <li>画面の下の「印刷・PDF」を押します。</li>
-    <li>印刷したい期間を選んで、「この期間で印刷」を押します。1枚に7日分が入ります。記録がない日（活動も問題や疑問も書いていない日）は、日付と「いいえ」の丸が印刷されます。</li>
+    <li>印刷したい期間を選んで、「この期間で印刷」を押します。1枚に7日分が入ります。活動を書いていない日は、「いいえ」の丸が印刷されます（「問題や疑問」にメモだけ書いた日も同じです）。記録がない日も、日付と「いいえ」の丸が印刷されます。</li>
     <li><b>iPhone</b>：右上の共有マーク（□に↑）を押して、「PDFを作成」を選びます。出てきた画面の右下の共有マークから、「ファイルに保存」などを選びます。</li>
-    <li><b>プリンターで印刷する</b>：プリンターを選んで、右上の青い印刷ボタンを押します。</li>
+    <li><b>Android</b>：画面の上にあるプリンター名の右の「▼」を押して、「PDF形式で保存」を選びます。右の青いボタンを押して、保存先を選びます。</li>
+    <li><b>プリンターで印刷する</b>：プリンターを選んで、青い印刷ボタンを押します。</li>
   </ol>
 
   <h3>5. Googleカレンダーに入れる</h3>
@@ -501,7 +506,7 @@ function buildPrint(){
           const acts=r.acts.map(a=>a.trim()).filter(Boolean);
           return `<tr>
             <td class="d"><div class="cellbox">${esc(fmt(r.date))}</div></td>
-            <td class="yn">${r.done?'<span class="maru"></span>':''}</td><td class="yn">${(!r.done&&!acts.length&&!(r.note||'').trim())?'<span class="maru"></span>':''}</td>
+            <td class="yn">${r.done?'<span class="maru"></span>':''}</td><td class="yn">${(!r.done&&!acts.length)?'<span class="maru"></span>':''}</td>
             <td><div class="cellbox fit"><ul>${acts.map(a=>'<li>'+esc(a)+'</li>').join('')}</ul></div></td>
             <td><div class="cellbox fit"><div class="nl">${esc(r.note)}</div></div></td>
           </tr>`;}).join('')}
