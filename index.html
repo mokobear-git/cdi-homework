@@ -95,32 +95,34 @@ dialog .row .text{flex:1;min-width:0;padding:10px 8px;font-size:15px}
 dialog .acts{display:flex;gap:10px;margin-top:16px}
 .dnote{font-size:17px;line-height:1.6;color:var(--ink);margin:8px 0 0}
 
-/* ===== 印刷用シート ===== */
+/* ===== 印刷用シート =====
+   寸法は、シートの幅を100とする「cqw」で指定する（186mm幅で設計）。
+   端末や印刷方法ごとに余白・倍率が違っても、全体が同じ比率で拡大・縮小され、崩れない。 */
 #printArea{display:none}
-.ppage{font-family:"Meiryo","メイリオ","Hiragino Sans","Yu Gothic",sans-serif;color:#000}
-.ptitle{text-align:center;font-weight:700;font-size:15pt;margin:2mm 0 8mm}
-.pmeta{display:flex;flex-wrap:wrap;gap:3mm 8mm;align-items:baseline;font-size:11pt;margin-bottom:6mm}
+.ppage{container-type:inline-size;font-family:"Meiryo","メイリオ","Hiragino Sans","Yu Gothic",sans-serif;color:#000}
+.ptitle{text-align:center;font-weight:700;font-size:2.845cqw;margin:1.075cqw 0 4.3cqw}
+.pmeta{display:flex;flex-wrap:wrap;gap:1.61cqw 4.3cqw;align-items:baseline;font-size:2.086cqw;margin-bottom:3.226cqw}
 .pmeta>span,.circ,.plain{white-space:nowrap}
-.circ{display:inline-block;border:1.5px solid #000;border-radius:50%;width:1.7em;height:1.7em;line-height:1.6em;text-align:center}
+.circ{display:inline-block;border:0.22cqw solid #000;border-radius:50%;width:1.7em;height:1.7em;line-height:1.6em;text-align:center}
 .plain{display:inline-block;width:1.7em;text-align:center}
-.circ.wide,.plain.wide{width:auto;height:auto;padding:0 2.2mm}
+.circ.wide,.plain.wide{width:auto;height:auto;padding:0 1.18cqw}
 .circ.wide{border-radius:1em}
 .oname{word-break:break-all;overflow-wrap:anywhere}
-.pname{display:inline-block;min-width:36mm;border-bottom:1px solid #000;padding:0 2mm;text-align:center}
-.ptable{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10.5pt}
-.ptable th,.ptable td{border:1px solid #000;vertical-align:top;padding:1.5mm 2mm}
-.ptable thead th{text-align:center;vertical-align:middle;font-weight:700;padding:3mm 2mm}
-.ptable th.yn{padding:1mm 0;font-size:9pt;white-space:nowrap}
-.ptable td.yn{text-align:center;font-size:16pt;vertical-align:middle}
-.maru{display:inline-block;box-sizing:border-box;width:5.5mm;height:5.5mm;border:0.4mm solid #000;border-radius:50%;vertical-align:middle}
+.pname{display:inline-block;min-width:19.35cqw;border-bottom:0.15cqw solid #000;padding:0 1.075cqw;text-align:center}
+.ptable{width:100%;border-collapse:collapse;table-layout:fixed;font-size:1.992cqw}
+.ptable th,.ptable td{border:0.2cqw solid #000;vertical-align:top;padding:0.806cqw 1.075cqw}
+.ptable thead th{text-align:center;vertical-align:middle;font-weight:700;padding:1.613cqw 1.075cqw}
+.ptable th.yn{padding:0.54cqw 0;font-size:1.707cqw;white-space:nowrap}
+.ptable td.yn{text-align:center;font-size:3.035cqw;vertical-align:middle}
+.maru{display:inline-block;box-sizing:border-box;width:2.957cqw;height:2.957cqw;border:0.215cqw solid #000;border-radius:50%;vertical-align:middle}
 .ptable .c-date{width:14%}
 .ptable .c-yn{width:6.48%}
 .ptable .c-act{width:30%}
 .ptable .c-note{width:43.04%}
-.ptable td.d{font-weight:700;font-size:11pt;padding-left:1.5mm;padding-right:1mm}
-.cellbox{height:24mm;overflow:hidden}
+.ptable td.d{font-weight:700;font-size:2.086cqw;padding-left:0.806cqw;padding-right:0.54cqw}
+.cellbox{height:12.9cqw;overflow:hidden}
 .cellbox ul{margin:0;padding:0;list-style:none}
-.cellbox li{margin-bottom:1mm}
+.cellbox li{margin-bottom:0.54cqw}
 .cellbox li::before{content:"・"}
 .cellbox .nl{white-space:pre-wrap;word-break:break-all;line-height:1.4}
 
@@ -516,40 +518,38 @@ function buildPrint(){
   fitPrint();
 }
 
-/* 文章が多いときは、枠に収まるまで文字を小さくする（日付は変えない） */
+/* 文章が多いときは、枠に収まるまで文字を小さくする（日付は変えない）。
+   寸法はすべて「シート幅=100」のcqw単位なので、印刷の余白や倍率が端末ごとに違っても同じ比率で出力される。
+   そのため、ここで測る幅は何mmでもよい（186mmで測る）。 */
 function fitPrint(){
   const pa=$('#printArea');
   const prev=pa.getAttribute('style');
-  // 印刷時と同じ幅（A4 - 余白12mm×2 = 186mm）で、画面の外に表示して測る
-  // iPhone/iPadの印刷は、画面上の寸法より約1.16倍に拡大されて出力される（実機で確認）。
-  // そのため、拡大後にA4へ収まるよう、幅を狭く・高さの上限を低くして測る。
-  const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  const W_MM=IOS?167:186;
-  pa.style.cssText='display:block;position:absolute;left:-10000px;top:0;width:'+W_MM+'mm;visibility:hidden';
-  const MM=96/25.4, MAX_MM=IOS?232:258; // 1ページの高さの上限（A4の印字範囲に余裕を持たせた値）
+  pa.style.cssText='display:block;position:absolute;left:-10000px;top:0;width:186mm;visibility:hidden';
+  const PT=0.18968, MMQ=0.5376;   // 1pt、1mm を cqw に直した値（186mm=100cqw）
+  const MAX_H=134;                // 1ページの高さの上限（シート幅を100とした値）。A4の印字範囲に余裕を持たせた値
   // 見出し（実施者・こどもの名前）は1行に入るよう、入らないときは文字を小さくする
   pa.querySelectorAll('.pmeta').forEach(m=>{
     let fs=11;
-    m.style.fontSize=fs+'pt';
+    m.style.fontSize=(fs*PT)+'cqw';
     const wrapped=()=>m.children.length>1&&m.children[1].offsetTop>m.children[0].offsetTop+8;
-    while(wrapped()&&fs>6){fs-=0.5;m.style.fontSize=fs+'pt';}
+    while(wrapped()&&fs>6){fs-=0.5;m.style.fontSize=(fs*PT)+'cqw';}
   });
   const over=b=>b.scrollHeight>b.clientHeight+1;
-  const pageMm=()=>Math.max(...[...pa.querySelectorAll('.ppage')].map(p=>p.getBoundingClientRect().height/MM));
-  const layout=h=>{
-    pa.querySelectorAll('.cellbox').forEach(b=>{b.style.height=h+'mm';b.style.overflow='hidden';});
+  const pageH=()=>Math.max(...[...pa.querySelectorAll('.ppage')].map(p=>{const r=p.getBoundingClientRect();return r.height/(r.width/100);}));
+  const layout=h=>{               // h は行の高さ（mm換算）
+    pa.querySelectorAll('.cellbox').forEach(b=>{b.style.height=(h*MMQ)+'cqw';b.style.overflow='hidden';});
     pa.querySelectorAll('.cellbox.fit').forEach(box=>{
       let fs=10.5;
-      box.style.fontSize=fs+'pt';
-      while(over(box)&&fs>6){fs-=0.5;box.style.fontSize=fs+'pt';}
+      box.style.fontSize=(fs*PT)+'cqw';
+      while(over(box)&&fs>6){fs-=0.5;box.style.fontSize=(fs*PT)+'cqw';}
       if(over(box)){box.style.height='auto';box.style.overflow='visible';} // 6ptでも入らない場合は行を広げる
     });
   };
-  // 端末（iPhoneなど）のフォントで1ページが長くなり下が切れないよう、行の高さを縮めて収める
+  // 1ページが長すぎて下が切れないよう、行の高さを縮めて収める
   let h=24;
   layout(h);
-  for(let k=0;k<6&&h>14&&pageMm()>MAX_MM;k++){
-    h=Math.max(14,h-Math.max(1,(pageMm()-MAX_MM)/7));
+  for(let k=0;k<6&&h>14&&pageH()>MAX_H;k++){
+    h=Math.max(14,h-Math.max(1,(pageH()-MAX_H)/MMQ/7));
     layout(h);
   }
   if(prev===null)pa.removeAttribute('style');else pa.setAttribute('style',prev);
