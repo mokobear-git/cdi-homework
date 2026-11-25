@@ -105,6 +105,7 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
 .ptable thead th{text-align:center;vertical-align:middle;font-weight:700;padding:3mm 2mm}
 .ptable th.yn{padding:1mm 0;font-size:9pt;white-space:nowrap}
 .ptable td.yn{text-align:center;font-size:16pt;vertical-align:middle}
+.maru{display:inline-block;box-sizing:border-box;width:5.5mm;height:5.5mm;border:0.4mm solid #000;border-radius:50%;vertical-align:middle}
 .ptable .c-date{width:14%}
 .ptable .c-yn{width:6.48%}
 .ptable .c-act{width:30%}
@@ -476,7 +477,7 @@ function buildPrint(){
           const acts=r.acts.map(a=>a.trim()).filter(Boolean);
           return `<tr>
             <td class="d"><div class="cellbox">${esc(fmt(r.date))}</div></td>
-            <td class="yn">${r.done?'✓':''}</td><td class="yn"></td>
+            <td class="yn">${r.done?'<span class="maru"></span>':''}</td><td class="yn"></td>
             <td><div class="cellbox fit"><ul>${acts.map(a=>'<li>'+esc(a)+'</li>').join('')}</ul></div></td>
             <td><div class="cellbox fit"><div class="nl">${esc(r.note)}</div></div></td>
           </tr>`;}).join('')}
