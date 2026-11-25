@@ -99,13 +99,14 @@ dialog .acts{display:flex;gap:10px;margin-top:16px}
 #printArea{display:none}
 .ppage{font-family:"Meiryo","メイリオ","Hiragino Sans","Yu Gothic",sans-serif;color:#000}
 .ptitle{text-align:center;font-weight:700;font-size:15pt;margin:2mm 0 8mm}
-.pmeta{display:flex;flex-wrap:wrap;gap:3mm 12mm;align-items:baseline;font-size:11pt;margin-bottom:6mm}
+.pmeta{display:flex;flex-wrap:wrap;gap:3mm 8mm;align-items:baseline;font-size:11pt;margin-bottom:6mm}
+.pmeta>span,.circ,.plain{white-space:nowrap}
 .circ{display:inline-block;border:1.5px solid #000;border-radius:50%;width:1.7em;height:1.7em;line-height:1.6em;text-align:center}
 .plain{display:inline-block;width:1.7em;text-align:center}
 .circ.wide,.plain.wide{width:auto;height:auto;padding:0 2.2mm}
 .circ.wide{border-radius:1em}
 .oname{word-break:break-all;overflow-wrap:anywhere}
-.pname{display:inline-block;min-width:60mm;border-bottom:1px solid #000;padding:0 2mm;text-align:center}
+.pname{display:inline-block;min-width:36mm;border-bottom:1px solid #000;padding:0 2mm;text-align:center}
 .ptable{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10.5pt}
 .ptable th,.ptable td{border:1px solid #000;vertical-align:top;padding:1.5mm 2mm}
 .ptable thead th{text-align:center;vertical-align:middle;font-weight:700;padding:3mm 2mm}
@@ -474,9 +475,14 @@ function buildPrint(){
   for(let p=0;p<padded.length;p+=7)pages.push(padded.slice(p,p+7));
 
   const mark=(v,label,wide)=>`<span class="${S.parent===v?'circ':'plain'}${wide?' wide':''}">${label}</span>`;
+  // 「その他」のときは、「その他」とは書かず、書かれた実施者名だけを丸で囲んで印刷する
+  const otherName=(S.other||'').trim();
+  const who=S.parent==='他'
+    ? mark('母','母')+'　'+mark('父','父')+'　<span class="circ wide">'+esc(otherName||'その他')+'</span>'
+    : mark('母','母')+'　'+mark('父','父')+'　'+mark('他','その他',true);
   const meta=`
     <div class="pmeta">
-      <span>実施者　${mark('母','母')}　${mark('父','父')}　${mark('他','その他',true)}${S.parent==='他'?'<span class="oname">（'+esc(S.other)+'）</span>':''}</span>
+      <span>実施者　${who}</span>
       <span>こどもの名前 <span class="pname">${esc(S.child)}</span></span>
     </div>`;
   $('#printArea').innerHTML=pages.map(pg=>`
@@ -516,6 +522,13 @@ function fitPrint(){
   const W_MM=IOS?167:186;
   pa.style.cssText='display:block;position:absolute;left:-10000px;top:0;width:'+W_MM+'mm;visibility:hidden';
   const MM=96/25.4, MAX_MM=IOS?232:258; // 1ページの高さの上限（A4の印字範囲に余裕を持たせた値）
+  // 見出し（実施者・こどもの名前）は1行に入るよう、入らないときは文字を小さくする
+  pa.querySelectorAll('.pmeta').forEach(m=>{
+    let fs=11;
+    m.style.fontSize=fs+'pt';
+    const wrapped=()=>m.children.length>1&&m.children[1].offsetTop>m.children[0].offsetTop+8;
+    while(wrapped()&&fs>6){fs-=0.5;m.style.fontSize=fs+'pt';}
+  });
   const over=b=>b.scrollHeight>b.clientHeight+1;
   const pageMm=()=>Math.max(...[...pa.querySelectorAll('.ppage')].map(p=>p.getBoundingClientRect().height/MM));
   const layout=h=>{
